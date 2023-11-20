@@ -1,0 +1,31 @@
+<html>
+    <head>
+        <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+        {% if title %}
+        <title>{{ title }} - Фильмотека</title>
+        {% else %}
+        <title>Фильмотека</title>
+        {% endif %}
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    </head>
+    <body>
+    <div class="container-xl">
+        <a class="btn btn-outline-primary" href="/" role="button">На главную</a>
+
+        <hr>
+        <h1>Студия: {{ studio.name }}</h1>
+        <hr>
+        Дата основания: {{ studio.dateFound }} |
+        <a class="btn btn-link" href="{{ studio.wikiLink }}" target="_blank" role="button">Больше информации о студии</a>
+
+        <h3 class="display-6"> Фильмы студии: </h3>
+        <ul class="list-group">
+        {% for film in films %}
+             <li class="list-group-item"><h3 class="display-6"><b>{{ film.name }}</b>  рейтинг фильма: {{ film.rating }}.0 <a class="btn btn-primary" href="/film/{{ film.id }}" role="button">Подробнее</a></h3></li>
+        {% endfor %}
+        </ul>
+
+    </div>
+    </body>
+</html>

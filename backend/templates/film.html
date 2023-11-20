@@ -1,0 +1,54 @@
+<html>
+    <head>
+        <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+        {% if title %}
+        <title>{{ title }} - Фильмотека</title>
+        {% else %}
+        <title>Фильмотека</title>
+        {% endif %}
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    </head>
+    <body>
+    <div class="container-xl">
+        <a class="btn btn-outline-primary" href="/" role="button">На главную</a>
+
+        <hr>
+        <h1>{{ film.name }}</h1>
+        <hr>
+        Жанры:
+        {% for genre in genres %}
+         <a class="btn btn-link" href="/genre/{{ genre.id }}" role="button">{{ genre.name }}</a>
+        {% endfor %}
+         Страны:
+        {% for country in countries %}
+         <a class="btn btn-link" href="/country/{{ country.id }}" role="button">{{ country.name }}</a>
+        {% endfor %}
+        <h5>Бюджет: {{ film.budget }} млн. $ | Дата выхода: {{ film.dateFound }} | Рейтинг: {{ film.rating }}.0 ★</h5>
+
+
+        <p class="lead">
+          {{ film.description }}
+        </p>
+
+        <div class="container">
+          <div class="row">
+            <div class="col-sm">
+               Студии:
+            {% for studio in studios %}
+             <a class="btn btn-primary" href="/studio/{{ studio.id }}" role="button">{{ studio.name }}</a>
+            {% endfor %}
+            </div>
+            <div class="col-sm">
+                      Актёры:
+                        {% for actor in actors %}
+                         <a class="btn btn-primary" href="/actor/{{ actor.id }}" role="button">{{ actor.name }} {{ actor.surname }}</a>
+                        {% endfor %}
+            </div>
+          </div>
+        </div>
+
+
+    </div>
+    </body>
+</html>
