@@ -19,7 +19,7 @@
         {% if films %}
         <ul class="list-group">
         {% for film in films %}
-             <li class="list-group-item"><h3 class="display-6"><b>{{ film.name }}</b>  рейтинг фильма: {{ film.rating }}.0 <a class="btn btn-primary" href="/film/{{ film.id }}" role="button">Подробнее</a></h3></li>
+             <li class="list-group-item"><h3 class="display-6"><b>{{ film.name }}</b>  рейтинг фильма: {{ film.rating }} <a class="btn btn-primary" href="/film/{{ film.id }}" role="button">Подробнее</a></h3></li>
         {% endfor %}
         </ul>
         {% else %}

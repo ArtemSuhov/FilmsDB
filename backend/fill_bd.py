@@ -6,7 +6,7 @@ def initial_fill ():
     db.fill_from_csv(csv_path="csv_base/countries.csv", tablename="Countries")
     db.fill_from_csv(csv_path="csv_base/studios.csv", tablename="Studios")
 
-    db.fill_from_csv(csv_path="csv_base/films.csv",tablename="Films")
+    db.fill_from_csv(csv_path="csv_base/films.csv", tablename="Films")
     db.fill_from_csv(csv_path="csv_base/actors.csv", tablename="Actors")
 
     db.fill_from_csv(csv_path="csv_base/actorscountries.csv", tablename="ActorsCountries")

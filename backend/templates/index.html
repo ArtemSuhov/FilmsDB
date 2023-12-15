@@ -36,9 +36,24 @@
         <hr>
         <ul class="list-group">
         {% for film in films %}
-             <li class="list-group-item"><h3 class="display-6"><b>{{ film.name }}</b>  рейтинг фильма: {{ film.rating }}.0 <a class="btn btn-primary" href="/film/{{ film.id }}" role="button">Подробнее</a></h3></li>
+             <li class="list-group-item"><h3 class="display-6"><b>{{ film.name }}</b>  рейтинг фильма: {{ film.rating }} <a class="btn btn-primary" href="/film/{{ film.id }}" role="button">Подробнее</a></h3></li>
         {% endfor %}
         </ul>
+        <hr>
+        Страница:
+
+        {% for i in range(-2,2,1) %}
+            {% if page + i  <= p_count and page + i > 0 %}
+                {% if i + 1 == page %}
+                <button type="button" class="btn btn-primary disabled">{{ i + 1 }}</button>
+                {% else %}
+                <a href="/index/{{ page + i }}" class="btn btn-outline-primary" tabindex="-1" role="button" aria-disabled="true">{{ page + i }}</a>
+                {% endif %}
+        {% endif %}
+
+
+
+        {% endfor %}
 
     </div>
     </body>

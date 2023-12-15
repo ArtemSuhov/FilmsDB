@@ -1,5 +1,5 @@
 import sqlite3
-import csv
+import logging
 import pandas as pd
 
 
@@ -7,23 +7,25 @@ class Database:
     def __init__(self, filename):
         self.filename = filename
 
-    def sql_do(self, sql):
+    def sql_do(self, sql, params):
         try:
-            self._db.cursor().execute(sql)
-            self._db.commit()
-            # log "Execution successful"
+            cur = self._db.cursor()
+            cur.execute(sql, params)
+            logging.info("Удачно запущен sql скрипт  " + sql + " с параметрами " + str(params))
 
         except sqlite3.OperationalError as e:
-            # log "error wit operations"
-            self._db.rollback()
-            raise
+            logging.error("Не удалось получить список из базы данных")
+            raise e
 
-    def db_select(self, sql):
+    def db_select(self, sql, params):
         try:
-            return self._db.cursor().execute(sql).fetchall()
+            cur = self._db.cursor()
+            cur.execute(sql, params)
+            logging.info("Удачно запущен sql скрипт " + sql + " с параметрами " + str(params))
+
+            return cur.fetchall()
         except Exception as e:
-            self._db.rollback()
-            # log Failed to fetch values
+            logging.error("Не удалось получить список из базы данных")
 
     def fill_from_csv(self, csv_path, tablename):
         reader = pd.read_csv(csv_path, delimiter=";", encoding="Windows-1251")
@@ -31,8 +33,8 @@ class Database:
             reader.to_sql(tablename, self._db, if_exists="replace", index=False)
         except sqlite3.OperationalError as e:
             self._db.rollback()
-            print("failed")
-            # log error
+            logging.error("Вставка в базу данных не удалась")
+
         self._db.commit()
 
     def execute_script_file(self, script_file):
@@ -44,12 +46,11 @@ class Database:
                 for command in sql_commands:
                     if command.strip():
                         self.sql_do(command)
-                # log "Execution succesfull"
+                logging.info("Удачно запущен sql скрипт из файла" + script_file)
 
             except sqlite3.OperationalError as e:
-                # log "error wit operations"
-                self._db.rollback()
-                raise
+                logging.error("Ошибка запуска скрипта из файла" + script_file)
+                raise e
 
     @property
     def filename(self):

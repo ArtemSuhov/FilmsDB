@@ -1,4 +1,5 @@
 from init import db
+import logging
 
 #Rating filter - film
 #genres filter - film
@@ -12,8 +13,8 @@ class Film:
         self.dateFound = dateFound
 
     def get_genres(self):
-        query = "SELECT idGenre FROM FilmsGenres WHERE idFilm = "
-        data = db.db_select(query + str(self.id))
+        query = "SELECT idGenre FROM FilmsGenres WHERE idFilm = ?"
+        data = db.db_select(query, [self.id])
 
         genres = []
         if data:
@@ -23,8 +24,8 @@ class Film:
         return genres
 
     def get_countries(self):
-        query = "SELECT idCountry FROM FilmsCountries WHERE idFilm = "
-        data = db.db_select(query + str(self.id))
+        query = "SELECT idCountry FROM FilmsCountries WHERE idFilm = ?"
+        data = db.db_select(query, [self.id])
 
         countries = []
         if data:
@@ -34,8 +35,8 @@ class Film:
         return countries
 
     def get_studios(self):
-        query = "SELECT idStudio FROM FilmsStudios WHERE idFilm = "
-        data = db.db_select(query + str(self.id))
+        query = "SELECT idStudio FROM FilmsStudios WHERE idFilm = ?"
+        data = db.db_select(query, [self.id])
 
         studios = []
         if data:
@@ -44,9 +45,18 @@ class Film:
 
         return studios
 
+
+    @staticmethod
+    def get_film_count():
+        query = "SELECT COUNT(id) from Films"
+        data = db.db_select(query, [])
+
+        return data[0][0]
+
+
     def get_actors(self):
-        query = "SELECT idActor FROM FilmsActors WHERE idFilm = "
-        data = db.db_select(query + str(self.id))
+        query = "SELECT idActor FROM FilmsActors WHERE idFilm = ?"
+        data = db.db_select(query, [self.id])
 
         actors = []
         if data:
@@ -57,8 +67,8 @@ class Film:
 
     @staticmethod
     def get_by_id(id : int):
-        query = "SELECT * FROM Films WHERE id = "
-        data = db.db_select(query + str(id))
+        query = "SELECT * FROM Films WHERE id = ?"
+        data = db.db_select(query, [id])
 
         if data:
             film_data = data[0]
@@ -66,24 +76,24 @@ class Film:
 
     @staticmethod
     def get_by_name(name : str):
-        query = "SELECT * FROM Films WHERE name = "
+        query = "SELECT * FROM Films WHERE name = ?"
 
         try:
-            data = db.db_select(query + "'" + name + "'")
+            data = db.db_select(query, ["'" + name + "'"])
             film_data = data[0]
         except:
-            print("failed to get by name")
+            logging.error("failed to get by name")
 
         if data:
             return Film(film_data[0],film_data[1],film_data[2],film_data[3],film_data[4],film_data[5])
 
     @staticmethod
-    def get_all_films():
-        i = 1
+    def get_page(n):
+        i = 1 + 20 * (n-1)
         film = Film.get_by_id(i)
         films = []
 
-        while film:
+        while film and (i - 20 * (n-1)) < 20:
             films.append(film)
             i = i + 1
             film = Film.get_by_id(i)
@@ -99,8 +109,8 @@ class Studio:
         self.dateFound = dateFound
 
     def get_films(self):
-        query = "SELECT idFilm FROM FilmsStudios WHERE idStudio = "
-        data = db.db_select(query + str(self.id))
+        query = "SELECT idFilm FROM FilmsStudios WHERE idStudio = ?"
+        data = db.db_select(query, [self.id])
 
         films = []
         if data:
@@ -111,8 +121,8 @@ class Studio:
 
     @staticmethod
     def get_by_id(id : int):
-        query = "SELECT * FROM Studios WHERE id = "
-        data = db.db_select(query + str(id))
+        query = "SELECT * FROM Studios WHERE id = ?"
+        data = db.db_select(query, [id])
         if data:
             studio_data = data[0]
             return Studio(studio_data[0],studio_data[1],studio_data[2],studio_data[3])
@@ -128,8 +138,8 @@ class Actor:
         self.dateBirth = dateBirth
 
     def get_countries(self):
-        query = "SELECT idCountry FROM ActorsCountries WHERE idActor = "
-        data = db.db_select(query + str(self.id))
+        query = "SELECT idCountry FROM ActorsCountries WHERE idActor = ?"
+        data = db.db_select(query, [self.id])
 
         countries = []
         if data:
@@ -139,8 +149,8 @@ class Actor:
         return countries
 
     def get_films(self):
-        query = "SELECT idFilm FROM FilmsActors WHERE idActor = "
-        data = db.db_select(query + str(self.id))
+        query = "SELECT idFilm FROM FilmsActors WHERE idActor = ?"
+        data = db.db_select(query, [self.id])
 
         films = []
         if data:
@@ -151,8 +161,8 @@ class Actor:
 
     @staticmethod
     def get_by_id(id : int):
-        query = "SELECT * FROM Actors WHERE id = "
-        data = db.db_select(query + str(id))
+        query = "SELECT * FROM Actors WHERE id = ?"
+        data = db.db_select(query, [id])
         if data:
             actor_data = data[0]
             return Actor(actor_data[0],actor_data[1],actor_data[2],actor_data[3],actor_data[4],actor_data[5])
@@ -163,8 +173,8 @@ class Genre:
         self.name = name
 
     def get_films(self):
-        query = "SELECT idFilm FROM FilmsGenres WHERE idGenre = "
-        data = db.db_select(query + str(self.id))
+        query = "SELECT idFilm FROM FilmsGenres WHERE idGenre = ?"
+        data = db.db_select(query, [self.id])
 
         films = []
         if data:
@@ -174,8 +184,8 @@ class Genre:
         return films
     @staticmethod
     def get_by_id(id : int):
-        query = "SELECT * FROM Genres WHERE id = "
-        data = db.db_select(query + str(id))
+        query = "SELECT * FROM Genres WHERE id = ?"
+        data = db.db_select(query, [id])
         if data:
             genre_data = data[0]
             return Genre(genre_data[0],genre_data[1])
@@ -200,8 +210,8 @@ class Country:
         self.name = name
 
     def get_films(self):
-        query = "SELECT idFilm FROM FilmsCountries WHERE idCountry = "
-        data = db.db_select(query + str(self.id))
+        query = "SELECT idFilm FROM FilmsCountries WHERE idCountry = ?"
+        data = db.db_select(query, [self.id])
 
         films = []
         if data:
@@ -211,8 +221,8 @@ class Country:
         return films
 
     def get_actors(self):
-        query = "SELECT idActor FROM ActorsCountries WHERE idCountry = "
-        data = db.db_select(query + str(self.id))
+        query = "SELECT idActor FROM ActorsCountries WHERE idCountry = ?"
+        data = db.db_select(query, [self.id])
 
         actors = []
         if data:
@@ -222,8 +232,8 @@ class Country:
         return actors
     @staticmethod
     def get_by_id(id : int):
-        query = "SELECT * FROM Countries WHERE id = "
-        data = db.db_select(query + str(id))
+        query = "SELECT * FROM Countries WHERE id = ?"
+        data = db.db_select(query, [id])
         if data:
             country_data = data[0]
             return Country(country_data[0],country_data[1])
@@ -235,8 +245,8 @@ class Gender:
 
     @staticmethod
     def get_by_id(id : int):
-        query = "SELECT * FROM Genders WHERE id = "
-        data = db.db_select(query + str(id))
+        query = "SELECT * FROM Genders WHERE id = ?"
+        data = db.db_select(query, [id])
         if data:
             gender_data = data[0]
             return Gender(gender_data[0],gender_data[1])
