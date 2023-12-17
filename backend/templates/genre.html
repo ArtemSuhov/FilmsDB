@@ -12,7 +12,13 @@
     <body>
     <div class="container-xl">
         <a class="btn btn-outline-primary" href="/" role="button">На главную</a>
-
+        <br>
+                    <form name="searchForm">
+                    <div class="input-group">
+                    <input type="text" name="s" сlass="form-control rounded" placeholder="я найду любую подстроку в строках названий и ваш фильм" >
+                    <input type="button" value="Найти" onclick="location.href='{{ genre.name }}/search/'+escape(document.forms['searchForm'].elements['s'].value)" class="btn btn-outline-primary">
+                    </div>
+                    </form>
         <hr>
         <h1>Жанр: {{ genre.name }}</h1>
         <hr>

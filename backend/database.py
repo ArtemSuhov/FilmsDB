@@ -11,6 +11,7 @@ class Database:
         try:
             cur = self._db.cursor()
             cur.execute(sql, params)
+            self._db.commit()
             logging.info("Удачно запущен sql скрипт  " + sql + " с параметрами " + str(params))
 
         except sqlite3.OperationalError as e:

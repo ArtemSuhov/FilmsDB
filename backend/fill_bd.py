@@ -1,6 +1,7 @@
 from init import db
 
-def initial_fill ():
+
+def initial_fill():
     db.fill_from_csv(csv_path="csv_base/genders.csv", tablename="Genders")
     db.fill_from_csv(csv_path="csv_base/genres.csv", tablename="Genres")
     db.fill_from_csv(csv_path="csv_base/countries.csv", tablename="Countries")
@@ -14,6 +15,7 @@ def initial_fill ():
     db.fill_from_csv(csv_path="csv_base/filmsgenres.csv", tablename="FilmsGenres")
     db.fill_from_csv(csv_path="csv_base/filmsstudios.csv", tablename="FilmsStudios")
     db.fill_from_csv(csv_path="csv_base/filmsactors.csv", tablename="FilmsActors")
+
 
 if __name__ == '__main__':
     initial_fill()

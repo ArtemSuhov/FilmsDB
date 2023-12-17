@@ -7,22 +7,6 @@ from db_classes import *
 app = Flask(__name__)
 
 
-@app.route('/search/<s>')
-def search_page(s):
-    # Переделать на поиск нормальный
-    all_films = Film.get_page(1)
-    films = []
-    s = s.replace("%", "\\").encode('utf-8').decode('unicode-escape')
-
-    for film in all_films:
-        if film.name.find(s) > 0:
-            films.append(film)
-
-    return render_template('search.html',
-                           title=s,
-                           films=films)
-
-
 @app.route('/')
 @app.route('/index/<int:page>')
 def main_page(page=1):
@@ -105,6 +89,35 @@ def country_page(id):
                            films=films,
                            country=country,
                            actors=actors)
+
+
+@app.route('/genre/<genre>/search/<s>')
+@app.route('/search/<s>')
+@app.route('/search/')
+def search_page(genre="", s=""):
+    films_count = Film.get_film_count()
+    pages_count = int(films_count / 20) + 1
+    all_films = []
+
+    for i in range(pages_count):
+        all_films.extend(Film.get_page(i))
+
+    films = []
+
+    s = s.replace("%", "\\").encode('utf-8').decode('unicode-escape')
+
+
+    for film in all_films:
+        genres = []
+        for genre_bd in film.get_genres():
+            genres.append(genre_bd.name)
+
+        if film.name.find(s) > 0 and (genre in genres or genre == ""):
+            films.append(film)
+
+    return render_template('search.html',
+                           title=s,
+                           films=films)
 
 
 if __name__ == '__main__':
