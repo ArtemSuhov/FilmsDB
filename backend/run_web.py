@@ -1,8 +1,9 @@
 import binascii
 
-from flask import Flask
+from flask import Flask, url_for
 from flask import render_template
 from db_classes import *
+import urllib.parse
 
 app = Flask(__name__)
 
@@ -12,7 +13,7 @@ app = Flask(__name__)
 def main_page(page=1):
     films = Film.get_page(page)
     films_count = Film.get_film_count()
-    pages_count = int(films_count / 20) + 1
+    pages_count = films_count // 20 + 1
 
     genres = Genre.get_all_genres()
 
@@ -33,7 +34,6 @@ def film_profile(id):
     countries = film.get_countries()
 
     return render_template('film.html',
-                           title=film.name,
                            film=film,
                            actors=actors,
                            studios=studios,
@@ -49,7 +49,6 @@ def actor_profile(id):
     gender = Gender.get_by_id(actor.genderId)
 
     return render_template('actor.html',
-                           title=actor.name + " " + actor.surname,
                            films=films,
                            actor=actor,
                            countries=countries,
@@ -62,7 +61,6 @@ def studio_profile(id):
     films = studio.get_films()
 
     return render_template('studio.html',
-                           title=studio.name,
                            films=films,
                            studio=studio)
 
@@ -73,7 +71,6 @@ def genre_page(id):
     films = genre.get_films()
 
     return render_template('genre.html',
-                           title=genre.name,
                            films=films,
                            genre=genre)
 
@@ -85,7 +82,6 @@ def country_page(id):
     actors = country.get_actors()
 
     return render_template('country.html',
-                           title=country.name,
                            films=films,
                            country=country,
                            actors=actors)
@@ -96,7 +92,7 @@ def country_page(id):
 @app.route('/search/')
 def search_page(genre="", s=""):
     films_count = Film.get_film_count()
-    pages_count = int(films_count / 20) + 1
+    pages_count = films_count // 20 + 1
     all_films = []
 
     for i in range(pages_count):
@@ -104,7 +100,9 @@ def search_page(genre="", s=""):
 
     films = []
 
-    s = s.replace("%", "\\").encode('utf-8').decode('unicode-escape')
+    s = (s.replace("%", "\\")
+         .encode('utf-8')
+         .decode('unicode-escape'))
 
 
     for film in all_films:

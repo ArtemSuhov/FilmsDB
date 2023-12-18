@@ -2,8 +2,8 @@
     <head>
         <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
-        {% if title %}
-        <title>{{ title }} - Фильмотека</title>
+        {% if film.name %}
+        <title>{{ film.name }} - Фильмотека</title>
         {% else %}
         <title>Фильмотека</title>
         {% endif %}
@@ -18,11 +18,11 @@
         <hr>
         Жанры:
         {% for genre in genres %}
-         <a class="btn btn-link" href="/genre/{{ genre.id }}" role="button">{{ genre.name }}</a>
+         <a class="btn btn-link" href="{{ url_for('genre_page', id = genre.id) }}" role="button">{{ genre.name }}</a>
         {% endfor %}
          Страны:
         {% for country in countries %}
-         <a class="btn btn-link" href="/country/{{ country.id }}" role="button">{{ country.name }}</a>
+         <a class="btn btn-link" href="{{ url_for('country_page', id = country.id) }}" role="button">{{ country.name }}</a>
         {% endfor %}
         <h5>Бюджет: {{ film.budget }} млн. $ | Дата выхода: {{ film.dateFound }} | Рейтинг: {{ film.rating }} ★</h5>
 
@@ -36,13 +36,13 @@
             <div class="col-sm">
                Студии:
             {% for studio in studios %}
-             <a class="btn btn-primary" href="/studio/{{ studio.id }}" role="button">{{ studio.name }}</a>
+             <a class="btn btn-primary" href="{{ url_for('studio_profile', id = studio.id) }}" role="button">{{ studio.name }}</a>
             {% endfor %}
             </div>
             <div class="col-sm">
                       Актёры:
                         {% for actor in actors %}
-                         <a class="btn btn-primary" href="/actor/{{ actor.id }}" role="button">{{ actor.name }} {{ actor.surname }}</a>
+                         <a class="btn btn-primary" href="{{ url_for('actor_profile', id = actor.id) }}" role="button">{{ actor.name }} {{ actor.surname }}</a>
                         {% endfor %}
             </div>
           </div>

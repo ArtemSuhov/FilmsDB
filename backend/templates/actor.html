@@ -2,8 +2,8 @@
     <head>
         <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
-        {% if title %}
-        <title>{{ title }} - Фильмотека</title>
+        {% if actor.name %}
+        <title>{{ actor.name + " " + actor.surname }} - Фильмотека</title>
         {% else %}
         <title>Фильмотека</title>
         {% endif %}
@@ -18,7 +18,7 @@
         <hr>
         Страны:
         {% for country in countries %}
-         <a class="btn btn-link" href="/country/{{ country.id }}" role="button">{{ country.name }}</a>
+         <a class="btn btn-link" href="{{  url_for('country_page', id = country.id) }}" role="button">{{ country.name }}</a>
         {% endfor %} |
         Гендер: {{ gender.name }} |
         Дата рождения: {{ actor.dateBirth }} |

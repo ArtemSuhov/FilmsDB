@@ -1,6 +1,6 @@
 import sqlite3
 import logging
-import pandas as pd
+import csv
 
 
 class Database:
@@ -12,7 +12,7 @@ class Database:
             cur = self._db.cursor()
             cur.execute(sql, params)
             self._db.commit()
-            logging.info("Удачно запущен sql скрипт  " + sql + " с параметрами " + str(params))
+            logging.debug("Удачно запущен SQL-запрос '%s' с параметрами %r", sql, params)
 
         except sqlite3.OperationalError as e:
             logging.error("Не удалось получить список из базы данных")
@@ -22,14 +22,14 @@ class Database:
         try:
             cur = self._db.cursor()
             cur.execute(sql, params)
-            logging.info("Удачно запущен sql скрипт " + sql + " с параметрами " + str(params))
+            logging.debug("Удачно запущен SQL-запрос '%s' с параметрами %r", sql, params)
 
             return cur.fetchall()
         except Exception as e:
             logging.error("Не удалось получить список из базы данных")
 
     def fill_from_csv(self, csv_path, tablename):
-        reader = pd.read_csv(csv_path, delimiter=";", encoding="Windows-1251")
+        reader = csv.reader(csv_path, delimiter=";", encoding="Windows-1251")
         try:
             reader.to_sql(tablename, self._db, if_exists="replace", index=False)
         except sqlite3.OperationalError as e:
@@ -47,10 +47,10 @@ class Database:
                 for command in sql_commands:
                     if command.strip():
                         self.sql_do(command)
-                logging.info("Удачно запущен sql скрипт из файла" + script_file)
+                logging.debug("Удачно запущен sql скрипт из файла '%s'", script_file)
 
             except sqlite3.OperationalError as e:
-                logging.error("Ошибка запуска скрипта из файла" + script_file)
+                logging.error("Ошибка запуска скрипта из файла  '%s'", script_file)
                 raise e
 
     @property
@@ -63,10 +63,7 @@ class Database:
         self._db = sqlite3.connect(fn, check_same_thread=False)
         self._db.row_factory = sqlite3.Row
 
-    @filename.deleter
-    def filename(self):
-        self.close()
 
-    def close(self):
+    def __del__(self):
         self._db.close()
         del self._filename

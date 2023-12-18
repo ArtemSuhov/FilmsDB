@@ -2,8 +2,8 @@
     <head>
         <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
-        {% if title %}
-        <title>{{ title }} - Фильмотека</title>
+        {% if country.name %}
+        <title>{{ country.name }} - Фильмотека</title>
         {% else %}
         <title>Фильмотека</title>
         {% endif %}
@@ -19,13 +19,13 @@
         <h3 class="display-6"> Фильмы страны: </h3>
         <ul class="list-group">
         {% for film in films %}
-             <li class="list-group-item"><h3 class="display-6"><b>{{ film.name }}</b>  рейтинг фильма: {{ film.rating }} <a class="btn btn-primary" href="/film/{{ film.id }}" role="button">Подробнее</a></h3></li>
+             <li class="list-group-item"><h3 class="display-6"><b>{{ film.name }}</b>  рейтинг фильма: {{ film.rating }} <a class="btn btn-primary" href="{{ url_for('film_profile', id = film.id) }}" role="button">Подробнее</a></h3></li>
         {% endfor %}
         </ul>
         </br>
         <h3 class="display-6"> Актёры: </h3>
         {% for actor in actors %}
-         <a class="btn btn-primary" href="/actor/{{ actor.id }}" role="button">{{ actor.name }} {{ actor.surname }}</a>
+         <a class="btn btn-primary" href="{{ url_for('actor_profile', id = actor.id) }}" role="button">{{ actor.name }} {{ actor.surname }}</a>
         {% endfor %}
 
     </div>

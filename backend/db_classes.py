@@ -1,6 +1,5 @@
 from init import db
 import logging
-
 class Film:
     def __init__(self, id, name, description, budget, rating, dateFound):
         self.id = id
@@ -85,14 +84,19 @@ class Film:
 
     @staticmethod
     def get_page(n):
-        i = 1 + 20 * (n - 1)
-        film = Film.get_by_id(i)
+        query = "SELECT * FROM Films LIMIT 20 OFFSET ?"
+        films_data = []
         films = []
 
-        while film and (i - 20 * (n - 1)) < 20:
-            films.append(film)
-            i = i + 1
-            film = Film.get_by_id(i)
+        try:
+            data = db.db_select(query, [20*(n-1)+1])
+            films_data = data
+        except:
+            logging.error("failed to get page")
+
+        if films_data:
+            for film_data in films_data:
+                films.append(Film(film_data[0], film_data[1], film_data[2], film_data[3], film_data[4], film_data[5]))
 
         return films
 
@@ -210,14 +214,19 @@ class Genre:
 
     @staticmethod
     def get_all_genres():
-        i = 1
-        genre = Genre.get_by_id(i)
+        query = "SELECT * FROM Genres ORDER BY name"
+        genres_data = []
         genres = []
 
-        while genre:
-            genres.append(genre)
-            i = i + 1
-            genre = Genre.get_by_id(i)
+        try:
+            data = db.db_select(query, [])
+            genres_data = data
+        except:
+            logging.error("failed to get by name")
+
+        if genres_data:
+            for genre_data in genres_data:
+                genres.append(Genre(genre_data[0], genre_data[1]))
 
         return genres
 
@@ -272,14 +281,19 @@ class Country:
 
     @staticmethod
     def get_all_countries():
-        i = 1
-        country = Country.get_by_id(i)
+        query = "SELECT * FROM Countries ORDER BY name"
+        countries_data = []
         countries = []
 
-        while country:
-            countries.append(country)
-            i = i + 1
-            country = Country.get_by_id(i)
+        try:
+            data = db.db_select(query, [])
+            countries_data = data
+        except:
+            logging.error("failed to get by name")
+
+        if countries_data:
+            for country_data in countries_data:
+                countries.append(Country(country_data[0], country_data[1]))
 
         return countries
 
