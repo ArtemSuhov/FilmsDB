@@ -6,6 +6,7 @@ from db_classes import Genre
 from db_classes import Country
 from db_classes import Actor
 from kinopoisk_unofficial.request.staff.person_request import PersonRequest
+import sys
 
 api_client = KinopoiskApiClient("7a0fcfa4-0ad1-43d2-a148-e3dcb778d11c")
 
@@ -123,37 +124,29 @@ def add_actor_kp(id_kp: int):
 
 def del_film(id: int):
     query = "DELETE from Films where id = ?"
-
     db.sql_do(query, [id])
 
     query = "DELETE from FilmsCountries where idFilm = ?"
-
     db.sql_do(query, [id])
 
     query = "DELETE from FilmsGenres where idFilm = ?"
-
     db.sql_do(query, [id])
 
     query = "DELETE from FilmsActors where idFilm = ?"
-
     db.sql_do(query, [id])
 
     query = "DELETE from FilmsStudios where idFilm = ?"
-
     db.sql_do(query, [id])
 
 
 def del_actor(id: int):
     query = "DELETE from Actors where id = ?"
-
     db.sql_do(query, [id])
 
     query = "DELETE from ActorsCountries where idActor = ?"
-
     db.sql_do(query, [id])
 
     query = "DELETE from FilmsActors where idActor = ?"
-
     db.sql_do(query, [id])
 
 
@@ -185,7 +178,7 @@ def edit_film(id, name=None, description=None, budget=None, rating=None, dateFou
         db.sql_do(query, [dateFound, id])
 
 
-def edit_acor(id, surname=None, name=None, wikiLink=None, genderId=None, dateBirth=None):
+def edit_actor(id, surname=None, name=None, wikiLink=None, genderId=None, dateBirth=None):
     if surname:
         query = "Update Actors set surname = ? where id = ?"
         db.sql_do(query, [surname, id])
@@ -204,4 +197,29 @@ def edit_acor(id, surname=None, name=None, wikiLink=None, genderId=None, dateBir
 
 
 if __name__ == '__main__':
-    print("Admin file")
+    while True:
+        command = input("Write a command: ")
+        match command.split():
+            case ["quit"]:
+                break
+            case ["?"]:
+                print("add_actor ; add_actor_kp; edit_actor; del_actor;")
+                print("add_film ; add_film _kp; edit_film; del_film;")
+            case ["add_actor", id, surname, name, wikiLink, genderId, dateBirth]:
+                add_actor(id, surname, name, wikiLink, genderId, dateBirth)
+            case ["add_film", id, name, description, budget, rating, dateFound]:
+                add_film(id, name, description, budget, rating, dateFound)
+            case ["add_film_kp", id]:
+                add_film_kp(id)
+            case ["add_actor_kp", id]:
+                add_actor_kp(id)
+            case ["del_actor", id]:
+                del_actor(id)
+            case ["del_film", id]:
+                del_film(id)
+            case ["edit_actor", id, surname, name, wikiLink, genderId, dateBirth]:
+                edit_actor(id, surname, name, wikiLink, genderId, dateBirth)
+            case ["edit_film", id, name, description, budget, rating, dateFound]:
+                edit_actor(id, name, description, budget, rating, dateFound)
+            case _:
+                print(f"Sorry, I couldn't understand {command!r}")
