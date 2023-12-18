@@ -4,8 +4,8 @@ CREATE TABLE Films
   name VARCHAR(255) NOT NULL,
   description TEXT,
   budget INT,
-  rating INT,
-  dateFound DATE
+  rating REAL,
+  dateFound TEXT
 );
 
 CREATE TABLE Genders
@@ -21,7 +21,7 @@ CREATE TABLE Actors
   name VARCHAR(255) NOT NULL,
   wikiLink VARCHAR(255),
   genderId INT NOT NULL,
-  dateBirth DATE,
+  dateBirth TEXT,
   FOREIGN KEY (genderId) REFERENCES Genders (id)
 );
 
@@ -36,7 +36,7 @@ CREATE TABLE Studios
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name VARCHAR(255) NOT NULL,
   wikiLink VARCHAR(255),
-  dateFound DATE
+  dateFound TEXT
 );
 
 CREATE TABLE Genres
