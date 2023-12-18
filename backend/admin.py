@@ -15,16 +15,17 @@ def add_film_kp(id_kp: int):
     request = FilmRequest(id_kp)
     response = api_client.films.send_film_request(request)
 
-    films_count = Film.get_film_count()
-    query = "INSERT INTO Films VALUES (?, ?, ?, ?, ?, ?)"
+
+    query = "INSERT INTO Films (name, description, budget, rating, dateFound) VALUES ( ?, ?, ?, ?, ?)"
     film = response.film
 
-    db.sql_do(query, [films_count + 1,
-                      str(film.name_ru),
+    db.sql_do(query, [str(film.name_ru),
                       str(film.description),
                       1,
                       float(film.rating_kinopoisk),
                       film.year])
+
+    film_id = Film.get_film_count()
 
     for genre in film.genres:
         print(genre.genre)
@@ -37,15 +38,16 @@ def add_film_kp(id_kp: int):
         if genre_id:
             query = "INSERT INTO FilmsGenres VALUES (?, ?)"
 
-            db.sql_do(query, [films_count + 1, genre_id])
+            db.sql_do(query, [film_id, genre_id])
         else:
-            query = "INSERT INTO Genres VALUES (?, ?)"
-            genre_id = len(Genre.get_all_genres())
-            db.sql_do(query, [genre_id + 1, genre.genre])
+            query = "INSERT INTO Genres (name) VALUES (?)"
+            db.sql_do(query, [genre.genre])
+
+            genre_bd = Genre.get_by_name(genre.genre)
 
             query = "INSERT INTO FilmsGenres VALUES (?, ?)"
 
-            db.sql_do(query, [films_count + 1, genre_id + 1])
+            db.sql_do(query, [film_id, genre_bd.id])
 
     for country in film.countries:
         print(country.country)
@@ -58,23 +60,24 @@ def add_film_kp(id_kp: int):
         if country_id:
             query = "INSERT INTO FilmsCountries VALUES (?, ?)"
 
-            db.sql_do(query, [films_count + 1, country_id])
+            db.sql_do(query, [film_id, country_id])
         else:
-            query = "INSERT INTO Countries VALUES (?, ?)"
-            country_id = len(Country.get_all_countries())
-            db.sql_do(query, [country_id + 1, country.country])
+            query = "INSERT INTO Countries (name) VALUES (?)"
+
+            db.sql_do(query, [country.country])
+
+            country_bd = Country.get_by_name(country.country)
 
             query = "INSERT INTO FilmsCountries VALUES (?, ?)"
 
-            db.sql_do(query, [films_count + 1, country_id + 1])
+            db.sql_do(query, [film_id, country_bd.id])
 
 
 def add_actor_kp(id_kp: int):
     request = PersonRequest(id_kp)
     response = api_client.staff.send_person_request(request)
 
-    actors_count = Actor.get_actors_count()
-    query = "INSERT INTO Actors VALUES (?, ?, ?, ?, ?, ?)"
+    query = "INSERT INTO Actors (surname, name, wikiLink, genderId, dateBirth) VALUES ( ?, ?, ?, ?, ?)"
     actor = response
 
     gender_id = 1
@@ -82,12 +85,13 @@ def add_actor_kp(id_kp: int):
         gender_id = 2
 
     db.sql_do(query,
-              [actors_count + 1,
-               actor.nameRu.split(" ")[1],
+              [actor.nameRu.split(" ")[1],
                actor.nameRu.split(" ")[0],
                "https://ru.wikipedia.org/",
                gender_id,
                actor.birthday])
+
+    actor_id = Actor.get_actors_count()
 
     for film in actor.films:
         print(film.name_ru)
@@ -100,7 +104,7 @@ def add_actor_kp(id_kp: int):
         if film_id:
             query = "INSERT INTO FilmsActors VALUES (?, ?)"
 
-            db.sql_do(query, [film_id, actors_count + 1])
+            db.sql_do(query, [film_id, actor_id])
 
     country_bd = Country.get_by_name(actor.birthplace)
     country_id = None
@@ -111,15 +115,17 @@ def add_actor_kp(id_kp: int):
     if country_id:
         query = "INSERT INTO ActorsCountries VALUES (?, ?)"
 
-        db.sql_do(query, [actors_count + 1, country_id])
+        db.sql_do(query, [actor_id, country_id])
     else:
-        query = "INSERT INTO Countries VALUES (?, ?)"
-        country_id = len(Country.get_all_countries())
-        db.sql_do(query, [country_id + 1, actor.birthplace])
+        query = "INSERT INTO Countries (name) VALUES (?)"
+
+        db.sql_do(query, [actor.birthplace])
+
+        country_bd = Country.get_by_name(actor.birthplace)
 
         query = "INSERT INTO ActorsCountries VALUES (?, ?)"
 
-        db.sql_do(query, [actors_count + 1, country_id + 1])
+        db.sql_do(query, [actor_id, country_bd.id])
 
 
 def del_film(id: int):
@@ -150,14 +156,14 @@ def del_actor(id: int):
     db.sql_do(query, [id])
 
 
-def add_film(id, name, description, budget, rating, dateFound):
-    query = "INSERT INTO Films VALUES (?, ?, ?, ?, ?, ?)"
-    db.sql_do(query, [id, name, description, budget, rating, dateFound])
+def add_film(name, description, budget, rating, dateFound):
+    query = "INSERT INTO Films (name, description, budget, rating, dateFound) VALUES ( ?, ?, ?, ?, ?)"
+    db.sql_do(query, [name, description, budget, rating, dateFound])
 
 
 def add_actor(id, surname, name, wikiLink, genderId, dateBirth):
-    query = "INSERT INTO Actors VALUES (?, ?, ?, ?, ?, ?)"
-    db.sql_do(query, [id, surname, name, wikiLink, genderId, dateBirth])
+    query = "INSERT INTO Actors (surname, name, wikiLink, genderId, dateBirth) VALUES ( ?, ?, ?, ?, ?)"
+    db.sql_do(query, [surname, name, wikiLink, genderId, dateBirth])
 
 
 def edit_film(id, name=None, description=None, budget=None, rating=None, dateFound=None):
