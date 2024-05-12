@@ -1,5 +1,6 @@
 import logging
 from init import db
+from typing import List
 
 PAGE_SIZE = 20
 
@@ -121,6 +122,41 @@ class Studio:
             studio_data = data[0]
             return Studio(*studio_data)
 
+
+    @staticmethod
+    def filter_films(genres: List[str], min_rating: float, countries: List[str]):
+        # Constructing the base query
+        query = "SELECT f.* FROM Films f"
+
+        # Adding conditions for genres
+        if genres:
+            query += " JOIN FilmsGenres fg ON f.id = fg.idFilm"
+            query += " JOIN Genres g ON fg.idGenre = g.id"
+            query += " WHERE g.name IN ({})".format(','.join(['?'] * len(genres)))
+
+        # Adding conditions for minimum rating
+        if min_rating:
+            if genres:
+                query += " AND"
+            else:
+                query += " WHERE"
+            query += " f.rating >= ?"
+
+        # Adding conditions for countries
+        if countries:
+            if genres or min_rating:
+                query += " AND"
+            else:
+                query += " WHERE"
+            query += " EXISTS (SELECT 1 FROM FilmsCountries fc JOIN Countries c ON fc.idCountry = c.id WHERE fc.idFilm = f.id AND c.name IN ({}))".format(','.join(['?'] * len(countries)))
+
+        # Executing the query
+        data = db.db_select(query, genres + [min_rating] + countries)
+        films = []
+        if data:
+            for film_data in data:
+                films.append(Film(*film_data))
+        return films
 
 class Actor:
     def __init__(self, id, surname, name, wikiLink, genderId, dateBirth):
