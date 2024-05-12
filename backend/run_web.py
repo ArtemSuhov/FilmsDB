@@ -1,91 +1,79 @@
 import binascii
+import urllib
 
-from flask import Flask, url_for
-from flask import render_template
+from flask import Flask, render_template
 from db_classes import *
-import urllib.parse
 
 app = Flask(__name__)
 
-
+# Route to display the main page with a paginated list of films
 @app.route('/')
 @app.route('/index/<int:page>')
 def main_page(page=1):
-    films = Film.get_page(page)
-    films_count = Film.get_film_count()
-    pages_count = films_count // 20 + 1
+    try:
+        films = Film.get_page(page)
+        films_count = Film.get_film_count()
+        pages_count = (films_count + PAGE_SIZE - 1) // PAGE_SIZE  # Calculate the number of pages
+        genres = Genre.get_all_genres()
+        return render_template('index.html', films=films, len=films_count, genres=genres, p_count=pages_count, page=page)
+    except Exception as e:
+        return render_template('error.html', message=str(e))
 
-    genres = Genre.get_all_genres()
-
-    return render_template('index.html',
-                           films=films,
-                           len=films_count,
-                           genres=genres,
-                           p_count=pages_count,
-                           page=page)
-
-
+# Route to display details about a specific film
 @app.route('/film/<int:id>')
 def film_profile(id):
-    film = Film.get_by_id(id)
-    actors = film.get_actors()
-    studios = film.get_studios()
-    genres = film.get_genres()
-    countries = film.get_countries()
+    try:
+        film = Film.get_by_id(id)
+        actors = film.get_actors()
+        studios = film.get_studios()
+        genres = film.get_genres()
+        countries = film.get_countries()
+        return render_template('film.html', film=film, actors=actors, studios=studios, genres=genres, countries=countries)
+    except Exception as e:
+        return render_template('error.html', message=str(e))
 
-    return render_template('film.html',
-                           film=film,
-                           actors=actors,
-                           studios=studios,
-                           genres=genres,
-                           countries=countries)
-
-
+# Route to display details about a specific actor
 @app.route('/actor/<int:id>')
 def actor_profile(id):
-    actor = Actor.get_by_id(id)
-    films = actor.get_films()
-    countries = actor.get_countries()
-    gender = Gender.get_by_id(actor.genderId)
+    try:
+        actor = Actor.get_by_id(id)
+        films = actor.get_films()
+        countries = actor.get_countries()
+        gender = Gender.get_by_id(actor.genderId)
+        return render_template('actor.html', films=films, actor=actor, countries=countries, gender=gender)
+    except Exception as e:
+        return render_template('error.html', message=str(e))
 
-    return render_template('actor.html',
-                           films=films,
-                           actor=actor,
-                           countries=countries,
-                           gender=gender)
-
-
+# Route to display details about a specific studio
 @app.route('/studio/<int:id>')
 def studio_profile(id):
-    studio = Studio.get_by_id(id)
-    films = studio.get_films()
+    try:
+        studio = Studio.get_by_id(id)
+        films = studio.get_films()
+        return render_template('studio.html', films=films, studio=studio)
+    except Exception as e:
+        return render_template('error.html', message=str(e))
 
-    return render_template('studio.html',
-                           films=films,
-                           studio=studio)
-
-
+# Route to display a list of films belonging to a specific genre
 @app.route('/genre/<int:id>')
 def genre_page(id):
-    genre = Genre.get_by_id(id)
-    films = genre.get_films()
+    try:
+        genre = Genre.get_by_id(id)
+        films = genre.get_films()
+        return render_template('genre.html', films=films, genre=genre)
+    except Exception as e:
+        return render_template('error.html', message=str(e))
 
-    return render_template('genre.html',
-                           films=films,
-                           genre=genre)
-
-
+# Route to display a list of films and actors associated with a specific country
 @app.route('/country/<int:id>')
 def country_page(id):
-    country = Country.get_by_id(id)
-    films = country.get_films()
-    actors = country.get_actors()
-
-    return render_template('country.html',
-                           films=films,
-                           country=country,
-                           actors=actors)
-
+    try:
+        country = Country.get_by_id(id)
+        films = country.get_films()
+        actors = country.get_actors()
+        return render_template('country.html', films=films, country=country, actors=actors)
+    except Exception as e:
+        return render_template('error.html', message=str(e))
 
 @app.route('/genre/<genre>/search/<s>')
 @app.route('/search/<s>')
@@ -116,7 +104,6 @@ def search_page(genre="", s=""):
     return render_template('search.html',
                            title=s,
                            films=films)
-
 
 if __name__ == '__main__':
     app.run()
