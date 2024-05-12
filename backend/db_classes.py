@@ -1,5 +1,8 @@
-from init import db
 import logging
+from init import db
+
+PAGE_SIZE = 20
+
 class Film:
     def __init__(self, id, name, description, budget, rating, dateFound):
         self.id = id
@@ -67,37 +70,28 @@ class Film:
 
         if data:
             film_data = data[0]
-            return Film(film_data[0], film_data[1], film_data[2], film_data[3], film_data[4], film_data[5])
+            return Film(*film_data)
 
     @staticmethod
     def get_by_name(name: str):
         query = "SELECT * FROM Films WHERE name = ?"
-
         try:
             data = db.db_select(query, [name])
-            film_data = data[0]
-        except:
-            logging.error("failed to get by name")
-
-        if data:
-            return Film(film_data[0], film_data[1], film_data[2], film_data[3], film_data[4], film_data[5])
+            if data:
+                film_data = data[0]
+                return Film(*film_data)
+        except Exception as e:
+            logging.error(f"Failed to get film by name: {e}")
 
     @staticmethod
-    def get_page(n):
-        query = "SELECT * FROM Films LIMIT 20 OFFSET ?"
-        films_data = []
+    def get_page(n: int):
+        query = "SELECT * FROM Films LIMIT ? OFFSET ?"
+        offset = (n - 1) * PAGE_SIZE
+        data = db.db_select(query, [PAGE_SIZE, offset])
         films = []
-
-        try:
-            data = db.db_select(query, [20*(n-1)+1])
-            films_data = data
-        except:
-            logging.error("failed to get page")
-
-        if films_data:
-            for film_data in films_data:
-                films.append(Film(film_data[0], film_data[1], film_data[2], film_data[3], film_data[4], film_data[5]))
-
+        if data:
+            for film_data in data:
+                films.append(Film(*film_data))
         return films
 
 
@@ -125,7 +119,7 @@ class Studio:
         data = db.db_select(query, [id])
         if data:
             studio_data = data[0]
-            return Studio(studio_data[0], studio_data[1], studio_data[2], studio_data[3])
+            return Studio(*studio_data)
 
 
 class Actor:
@@ -172,7 +166,7 @@ class Actor:
         data = db.db_select(query, [id])
         if data:
             actor_data = data[0]
-            return Actor(actor_data[0], actor_data[1], actor_data[2], actor_data[3], actor_data[4], actor_data[5])
+            return Actor(*actor_data)
 
 
 class Genre:
@@ -194,15 +188,13 @@ class Genre:
     @staticmethod
     def get_by_name(name: str):
         query = "SELECT * FROM Genres WHERE name = ?"
-
         try:
             data = db.db_select(query, [name])
-            genre_data = data[0]
-        except:
-            logging.error("failed to get by name")
-
-        if data:
-            return Genre(genre_data[0], genre_data[1])
+            if data:
+                genre_data = data[0]
+                return Genre(*genre_data)
+        except Exception as e:
+            logging.error(f"Failed to get genre by name: {e}")
 
     @staticmethod
     def get_by_id(id: int):
@@ -210,25 +202,20 @@ class Genre:
         data = db.db_select(query, [id])
         if data:
             genre_data = data[0]
-            return Genre(genre_data[0], genre_data[1])
+            return Genre(*genre_data)
 
     @staticmethod
     def get_all_genres():
         query = "SELECT * FROM Genres ORDER BY name"
         genres_data = []
-        genres = []
-
         try:
             data = db.db_select(query, [])
-            genres_data = data
-        except:
-            logging.error("failed to get by name")
-
-        if genres_data:
-            for genre_data in genres_data:
-                genres.append(Genre(genre_data[0], genre_data[1]))
-
-        return genres
+            if data:
+                for genre_data in data:
+                    genres_data.append(Genre(*genre_data))
+        except Exception as e:
+            logging.error(f"Failed to get all genres: {e}")
+        return genres_data
 
 
 class Country:
@@ -264,38 +251,31 @@ class Country:
         data = db.db_select(query, [id])
         if data:
             country_data = data[0]
-            return Country(country_data[0], country_data[1])
+            return Country(*country_data)
 
     @staticmethod
     def get_by_name(name: str):
         query = "SELECT * FROM Countries WHERE name = ?"
-
         try:
             data = db.db_select(query, [name])
-            country_data = data[0]
-        except:
-            logging.error("failed to get by name")
-
-        if data:
-            return Country(country_data[0], country_data[1])
+            if data:
+                country_data = data[0]
+                return Country(*country_data)
+        except Exception as e:
+            logging.error(f"Failed to get country by name: {e}")
 
     @staticmethod
     def get_all_countries():
         query = "SELECT * FROM Countries ORDER BY name"
         countries_data = []
-        countries = []
-
         try:
             data = db.db_select(query, [])
-            countries_data = data
-        except:
-            logging.error("failed to get by name")
-
-        if countries_data:
-            for country_data in countries_data:
-                countries.append(Country(country_data[0], country_data[1]))
-
-        return countries
+            if data:
+                for country_data in data:
+                    countries_data.append(Country(*country_data))
+        except Exception as e:
+            logging.error(f"Failed to get all countries: {e}")
+        return countries_data
 
 
 class Gender:
@@ -309,4 +289,4 @@ class Gender:
         data = db.db_select(query, [id])
         if data:
             gender_data = data[0]
-            return Gender(gender_data[0], gender_data[1])
+            return Gender(*gender_data)
