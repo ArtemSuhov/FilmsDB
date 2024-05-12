@@ -73,4 +73,4 @@ This admin tool provides functionality to manage films and actors in the databas
 
 
 # ToDoList:
-- Добавить полноценный фильтр фильмов
+- Внедрить в UI (шаблоны) фильтр фильмов
