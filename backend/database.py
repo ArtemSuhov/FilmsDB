@@ -1,56 +1,67 @@
 import sqlite3
 import logging
 import csv
-
+from typing import Any, List, Tuple
 
 class Database:
     def __init__(self, filename):
         self.filename = filename
 
-    def sql_do(self, sql, params):
+    def sql_do(self, sql: str, params: Tuple[Any, ...] = ()):
         try:
             cur = self._db.cursor()
             cur.execute(sql, params)
             self._db.commit()
-            logging.debug("Удачно запущен SQL-запрос '%s' с параметрами %r", sql, params)
+            logging.debug("Successfully executed SQL query: %s with parameters %r", sql, params)
 
-        except sqlite3.OperationalError as e:
-            logging.error("Не удалось получить список из базы данных")
+        except sqlite3.Error as e:
+            logging.error("Failed to execute SQL query: %s", e)
             raise e
 
-    def db_select(self, sql, params):
+
+    def db_select(self, sql: str, params: Tuple[Any, ...] = ()) -> List[Tuple]:
         try:
             cur = self._db.cursor()
             cur.execute(sql, params)
-            logging.debug("Удачно запущен SQL-запрос '%s' с параметрами %r", sql, params)
+            logging.debug("Successfully executed SQL query: %s with parameters %r", sql, params)
 
             return cur.fetchall()
-        except Exception as e:
-            logging.error("Не удалось получить список из базы данных")
+        except sqlite3.Error as e:
+            logging.error("Failed to fetch data from database: %s", e)
+            raise e
 
-    def fill_from_csv(self, csv_path, tablename):
-        reader = csv.reader(csv_path, delimiter=";", encoding="Windows-1251")
-        try:
-            reader.to_sql(tablename, self._db, if_exists="replace", index=False)
-        except sqlite3.OperationalError as e:
-            self._db.rollback()
-            logging.error("Вставка в базу данных не удалась")
 
-        self._db.commit()
+    def fill_from_csv(self, csv_path: str, tablename: str):
+        with open(csv_path, 'r', encoding="Windows-1251") as file:
+            reader = csv.reader(file, delimiter=";")
+            next(reader)  # Skip header row
 
-    def execute_script_file(self, script_file):
+            try:
+                cur = self._db.cursor()
+                cur.executemany(f"INSERT INTO {tablename} VALUES (?, ?, ?)", reader)
+                self._db.commit()
+                logging.debug("Successfully filled data from CSV to table: %s", tablename)
+            except sqlite3.Error as e:
+                self._db.rollback()
+                logging.error("Failed to fill data from CSV to table: %s", e)
+                raise e
+
+
+    def execute_script_file(self, script_file: str):
         with open(script_file, 'r') as file:
             sql_script = file.read()
             sql_commands = sql_script.split(';')
 
             try:
+                cur = self._db.cursor()
                 for command in sql_commands:
                     if command.strip():
-                        self.sql_do(command)
-                logging.debug("Удачно запущен sql скрипт из файла '%s'", script_file)
+                        cur.execute(command)
+                self._db.commit()
+                logging.debug("Successfully executed SQL script from file: %s", script_file)
 
-            except sqlite3.OperationalError as e:
-                logging.error("Ошибка запуска скрипта из файла  '%s'", script_file)
+            except sqlite3.Error as e:
+                logging.error("Failed to execute SQL script from file: %s", e)
                 raise e
 
     @property
