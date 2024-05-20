@@ -70,7 +70,3 @@ This admin tool provides functionality to manage films and actors in the databas
 - Date format: YYYY-MM-DD.
 
 --- 
-
-
-# ToDoList:
-- Внедрить в UI (шаблоны) фильтр фильмов
