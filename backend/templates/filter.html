@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Умный фильтр фильмов</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-5">Фильтр фильмов</h1>
+        <form action="{{ url_for('filtered_films') }}" method="GET" class="mt-4" onsubmit="removeEmptyFields()">
+            <div class="mb-3">
+                <label for="genres" class="form-label">Жанры:</label><br>
+                {% for genre in all_genres %}
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="genres" id="genre_{{ loop.index }}" value="{{ genre.name }}">
+                    <label class="form-check-label" for="genre_{{ loop.index }}">{{ genre.name }}</label>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="mb-3">
+                <label for="min_rating" class="form-label">Минимальный рейтинг:</label>
+                <input type="range" name="min_rating" id="min_rating" min="1" max="10" step="0.1" class="form-range" oninput="updateRatingValue(this.value)">
+                <div id="ratingValue" class="mt-2">Текущий рейтинг: 5</div>
+            </div>
+            <div class="mb-3">
+                <label for="countries" class="form-label">Страны:</label>
+                <select name="countries" id="countries" multiple class="form-select">
+                    {% for country in all_countries %}
+                    <option value="{{ country.name }}">{{ country.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Применить фильтры</button>
+        </form>
+        <hr class="mt-5">
+        <h2 class="mt-4">Отфильтрованные фильмы</h2>
+        <ul class="list-group">
+            {% for film in filtered_films %}
+            <li class="list-group-item">
+                <a href="{{ url_for('film_profile', id=film.id) }}" class="text-decoration-none">{{ film.name }}</a> - Рейтинг: {{ film.rating }}
+            </li>
+            {% endfor %}
+        </ul>
+        {% if filtered_films %}
+        <nav class="mt-4">
+            <ul class="pagination">
+                <li class="page-item {% if page == 1 %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('filtered_films', page=page-1) }}">Предыдущая</a>
+                </li>
+                <li class="page-item {% if not has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('filtered_films', page=page+1) }}">Следующая</a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+
+    <!-- Bootstrap JS (optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function updateRatingValue(value) {
+            document.getElementById('ratingValue').innerText = 'Текущий рейтинг: ' + value;
+        }
+
+        function removeEmptyFields() {
+            var form = document.querySelector('form');
+            var inputs = form.querySelectorAll('input, select');
+            inputs.forEach(function(input) {
+                if (!input.value) {
+                    input.disabled = true;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

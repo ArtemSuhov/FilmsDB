@@ -1,7 +1,7 @@
 import binascii
 import urllib
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from db_classes import *
 
 app = Flask(__name__)
@@ -75,6 +75,25 @@ def country_page(id):
     except Exception as e:
         return render_template('error.html', message=str(e))
 
+@app.route('/filter')
+def filter():
+    all_genres = Genre.get_all_genres()
+    all_countries = Country.get_all_countries()
+    return render_template('filter.html', all_genres=all_genres, all_countries=all_countries, page=1)
+
+@app.route('/filtered_films', methods=['GET'])
+def filtered_films():
+    all_genres = Genre.get_all_genres()
+    all_countries = Country.get_all_countries()
+    genres = request.args.getlist('genres')
+    min_rating = float(request.args.get('min_rating', 0))
+    countries = request.args.getlist('countries')
+
+    filtered_films = Studio.filter_films(genres, min_rating, countries)
+
+
+    return render_template('filter.html', filtered_films=filtered_films, all_genres=all_genres, all_countries=all_countries, page=1)
+
 @app.route('/genre/<genre>/search/<s>')
 @app.route('/search/<s>')
 @app.route('/search/')
@@ -106,4 +125,4 @@ def search_page(genre="", s=""):
                            films=films)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
