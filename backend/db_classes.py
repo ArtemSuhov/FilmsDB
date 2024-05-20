@@ -17,10 +17,17 @@ class Film:
         query = "SELECT idGenre FROM FilmsGenres WHERE idFilm = ?"
         data = db.db_select(query, [self.id])
 
+        if not data:
+            return []
+
+        genre_queries = [("SELECT * FROM Genres WHERE id = ?", (genre_id[0],)) for genre_id in data]
+        genre_data = db.sql_do_all(genre_queries)
+
         genres = []
-        if data:
-            for genre_id in data:
-                genres.append(Genre.get_by_id(genre_id[0]))
+        if genre_data:
+            for g in genre_data:
+                for genre in g:
+                    genres.append(Genre(*genre))
 
         return genres
 
@@ -28,10 +35,17 @@ class Film:
         query = "SELECT idCountry FROM FilmsCountries WHERE idFilm = ?"
         data = db.db_select(query, [self.id])
 
+        if not data:
+            return []
+
+        country_queries = [("SELECT * FROM Countries WHERE id = ?", (country_id[0],)) for country_id in data]
+        country_data = db.sql_do_all(country_queries)
+
         countries = []
-        if data:
-            for country_id in data:
-                countries.append(Country.get_by_id(country_id[0]))
+        if country_data:
+            for c in country_data:
+                for country in c:
+                    countries.append(Country(*country))
 
         return countries
 
@@ -39,10 +53,17 @@ class Film:
         query = "SELECT idStudio FROM FilmsStudios WHERE idFilm = ?"
         data = db.db_select(query, [self.id])
 
+        if not data:
+            return []
+
+        studio_queries = [("SELECT * FROM Studios WHERE id = ?", (studio_id[0],)) for studio_id in data]
+        studio_data = db.sql_do_all(studio_queries)
+
         studios = []
-        if data:
-            for studio_id in data:
-                studios.append(Studio.get_by_id(studio_id[0]))
+        if studio_data:
+            for s in studio_data:
+                for studio in s:
+                    studios.append(Studio(*studio))
 
         return studios
 
@@ -50,17 +71,23 @@ class Film:
     def get_film_count():
         query = "SELECT COUNT(id) from Films"
         data = db.db_select(query, [])
-
-        return data[0][0]
+        return data[0][0] if data else 0
 
     def get_actors(self):
         query = "SELECT idActor FROM FilmsActors WHERE idFilm = ?"
         data = db.db_select(query, [self.id])
 
+        if not data:
+            return []
+
+        actor_queries = [("SELECT * FROM Actors WHERE id = ?", (actor_id[0],)) for actor_id in data]
+        actor_data = db.sql_do_all(actor_queries)
+
         actors = []
-        if data:
-            for actor_id in data:
-                actors.append(Actor.get_by_id(actor_id[0]))
+        if actor_data:
+            for a in actor_data:
+                for actor in a:
+                    actors.append(Actor(*actor))
 
         return actors
 
@@ -89,6 +116,7 @@ class Film:
         query = "SELECT * FROM Films LIMIT ? OFFSET ?"
         offset = (n - 1) * PAGE_SIZE
         data = db.db_select(query, [PAGE_SIZE, offset])
+
         films = []
         if data:
             for film_data in data:
@@ -107,10 +135,17 @@ class Studio:
         query = "SELECT idFilm FROM FilmsStudios WHERE idStudio = ?"
         data = db.db_select(query, [self.id])
 
+        if not data:
+            return []
+
+        film_queries = [("SELECT * FROM Films WHERE id = ?", (film_id[0],)) for film_id in data]
+        film_data = db.sql_do_all(film_queries)
+
         films = []
-        if data:
-            for film_id in data:
-                films.append(Film.get_by_id(film_id[0]))
+        if film_data:
+            for f in film_data:
+                for film in f:
+                    films.append(Film(*film))
 
         return films
 
@@ -122,19 +157,15 @@ class Studio:
             studio_data = data[0]
             return Studio(*studio_data)
 
-
     @staticmethod
     def filter_films(genres: List[str], min_rating: float, countries: List[str]):
-        # Constructing the base query
         query = "SELECT f.* FROM Films f"
 
-        # Adding conditions for genres
         if genres:
             query += " JOIN FilmsGenres fg ON f.id = fg.idFilm"
             query += " JOIN Genres g ON fg.idGenre = g.id"
             query += " WHERE g.name IN ({})".format(','.join(['?'] * len(genres)))
 
-        # Adding conditions for minimum rating
         if min_rating:
             if genres:
                 query += " AND"
@@ -142,7 +173,6 @@ class Studio:
                 query += " WHERE"
             query += " f.rating >= ?"
 
-        # Adding conditions for countries
         if countries:
             if genres or min_rating:
                 query += " AND"
@@ -150,13 +180,13 @@ class Studio:
                 query += " WHERE"
             query += " EXISTS (SELECT 1 FROM FilmsCountries fc JOIN Countries c ON fc.idCountry = c.id WHERE fc.idFilm = f.id AND c.name IN ({}))".format(','.join(['?'] * len(countries)))
 
-        # Executing the query
         data = db.db_select(query, genres + [min_rating] + countries)
         films = []
         if data:
             for film_data in data:
                 films.append(Film(*film_data))
         return films
+
 
 class Actor:
     def __init__(self, id, surname, name, wikiLink, genderId, dateBirth):
@@ -171,10 +201,17 @@ class Actor:
         query = "SELECT idCountry FROM ActorsCountries WHERE idActor = ?"
         data = db.db_select(query, [self.id])
 
+        if not data:
+            return []
+
+        country_queries = [("SELECT * FROM Countries WHERE id = ?", (country_id[0],)) for country_id in data]
+        country_data = db.sql_do_all(country_queries)
+
         countries = []
-        if data:
-            for country_id in data:
-                countries.append(Country.get_by_id(country_id[0]))
+        if country_data:
+            for c in country_data:
+                for country in c:
+                    countries.append(Country(*country))
 
         return countries
 
@@ -182,10 +219,17 @@ class Actor:
         query = "SELECT idFilm FROM FilmsActors WHERE idActor = ?"
         data = db.db_select(query, [self.id])
 
+        if not data:
+            return []
+
+        film_queries = [("SELECT * FROM Films WHERE id = ?", (film_id[0],)) for film_id in data]
+        film_data = db.sql_do_all(film_queries)
+
         films = []
-        if data:
-            for film_id in data:
-                films.append(Film.get_by_id(film_id[0]))
+        if film_data:
+            for f in film_data:
+                for film in f:
+                    films.append(Film(*film))
 
         return films
 
@@ -193,8 +237,7 @@ class Actor:
     def get_actors_count():
         query = "SELECT COUNT(id) from Actors"
         data = db.db_select(query, [])
-
-        return data[0][0]
+        return data[0][0] if data else 0
 
     @staticmethod
     def get_by_id(id: int):
@@ -214,10 +257,17 @@ class Genre:
         query = "SELECT idFilm FROM FilmsGenres WHERE idGenre = ?"
         data = db.db_select(query, [self.id])
 
+        if not data:
+            return []
+
+        film_queries = [("SELECT * FROM Films WHERE id = ?", (film_id[0],)) for film_id in data]
+        film_data = db.sql_do_all(film_queries)
+
         films = []
-        if data:
-            for film_id in data:
-                films.append(Film.get_by_id(film_id[0]))
+        if film_data:
+            for f in film_data:
+                for film in f:
+                    films.append(Film(*film))
 
         return films
 
@@ -263,10 +313,17 @@ class Country:
         query = "SELECT idFilm FROM FilmsCountries WHERE idCountry = ?"
         data = db.db_select(query, [self.id])
 
+        if not data:
+            return []
+
+        film_queries = [("SELECT * FROM Films WHERE id = ?", (film_id[0],)) for film_id in data]
+        film_data = db.sql_do_all(film_queries)
+
         films = []
-        if data:
-            for film_id in data:
-                films.append(Film.get_by_id(film_id[0]))
+        if film_data:
+            for f in film_data:
+                for film in f:
+                    films.append(Film(*film))
 
         return films
 
@@ -274,10 +331,17 @@ class Country:
         query = "SELECT idActor FROM ActorsCountries WHERE idCountry = ?"
         data = db.db_select(query, [self.id])
 
+        if not data:
+            return []
+
+        actor_queries = [("SELECT * FROM Actors WHERE id = ?", (actor_id[0],)) for actor_id in data]
+        actor_data = db.sql_do_all(actor_queries)
+
         actors = []
-        if data:
-            for actor_id in data:
-                actors.append(Actor.get_by_id(actor_id[0]))
+        if actor_data:
+            for a in actor_data:
+                for actor in a:
+                    actors.append(Actor(*actor))
 
         return actors
 

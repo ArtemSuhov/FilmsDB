@@ -48,13 +48,17 @@ class Database:
 
 
     def sql_do_all(self, sql_commands: List[Tuple[str, Tuple[Any, ...]]]):
+        results = []
         try:
             cur = self._db.cursor()
             self._db.execute('BEGIN')
             for sql, params in sql_commands:
                 cur.execute(sql, params)
+                if sql.strip().upper().startswith("SELECT"):
+                    results.append(cur.fetchall())
             self._db.commit()
             logging.debug("Successfully executed all SQL queries as a transaction.")
+            return results
         except sqlite3.Error as e:
             self._db.rollback()
             logging.error("Failed to execute all SQL queries: %s", e)
