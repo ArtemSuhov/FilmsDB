@@ -47,22 +47,19 @@ class Database:
                 raise e
 
 
-    def execute_script_file(self, script_file: str):
-        with open(script_file, 'r') as file:
-            sql_script = file.read()
-            sql_commands = sql_script.split(';')
+    def sql_do_all(self, sql_commands: List[Tuple[str, Tuple[Any, ...]]]):
+        try:
+            cur = self._db.cursor()
+            self._db.execute('BEGIN')
+            for sql, params in sql_commands:
+                cur.execute(sql, params)
+            self._db.commit()
+            logging.debug("Successfully executed all SQL queries as a transaction.")
+        except sqlite3.Error as e:
+            self._db.rollback()
+            logging.error("Failed to execute all SQL queries: %s", e)
+            raise e
 
-            try:
-                cur = self._db.cursor()
-                for command in sql_commands:
-                    if command.strip():
-                        cur.execute(command)
-                self._db.commit()
-                logging.debug("Successfully executed SQL script from file: %s", script_file)
-
-            except sqlite3.Error as e:
-                logging.error("Failed to execute SQL script from file: %s", e)
-                raise e
 
     @property
     def filename(self):
