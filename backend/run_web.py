@@ -1,7 +1,7 @@
 import binascii
 import urllib
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from db_classes import *
 
 app = Flask(__name__)
@@ -123,6 +123,11 @@ def search_page(genre="", s=""):
     return render_template('search.html',
                            title=s,
                            films=films)
+
+@app.route('/fullsearch')
+def full_text_search_page():
+    return render_template('fullsearch.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)

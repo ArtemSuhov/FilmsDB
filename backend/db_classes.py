@@ -68,6 +68,16 @@ class Film:
         return studios
 
     @staticmethod
+    def full_text_search(query: str):
+        full_text_query = "SELECT * FROM Films WHERE description MATCH ?"
+        data = db.db_select(full_text_query, [query])
+        films = []
+        if data:
+            for film_data in data:
+                films.append(Film(*film_data))
+        return films
+
+    @staticmethod
     def get_film_count():
         query = "SELECT COUNT(id) from Films"
         data = db.db_select(query, [])
@@ -160,27 +170,29 @@ class Studio:
     @staticmethod
     def filter_films(genres: List[str], min_rating: float, countries: List[str]):
         query = "SELECT f.* FROM Films f"
+        constraints = []
+        params = []
 
         if genres:
             query += " JOIN FilmsGenres fg ON f.id = fg.idFilm"
             query += " JOIN Genres g ON fg.idGenre = g.id"
-            query += " WHERE g.name IN ({})".format(','.join(['?'] * len(genres)))
+            constraints.append("g.name IN ({})".format(','.join(['?'] * len(genres))))
+            params.extend(genres)
 
         if min_rating:
-            if genres:
-                query += " AND"
-            else:
-                query += " WHERE"
-            query += " f.rating >= ?"
+            constraints.append("f.rating >= ?")
+            params.append(min_rating)
 
         if countries:
-            if genres or min_rating:
-                query += " AND"
-            else:
-                query += " WHERE"
-            query += " EXISTS (SELECT 1 FROM FilmsCountries fc JOIN Countries c ON fc.idCountry = c.id WHERE fc.idFilm = f.id AND c.name IN ({}))".format(','.join(['?'] * len(countries)))
+            constraints.append(
+                "EXISTS (SELECT 1 FROM FilmsCountries fc JOIN Countries c ON fc.idCountry = c.id WHERE fc.idFilm = f.id AND c.name IN ({}))".format(
+                    ','.join(['?'] * len(countries))))
+            params.extend(countries)
 
-        data = db.db_select(query, genres + [min_rating] + countries)
+        if constraints:
+            query += " WHERE " + " AND ".join(constraints)
+
+        data = db.db_select(query, tuple(params))
         films = []
         if data:
             for film_data in data:
