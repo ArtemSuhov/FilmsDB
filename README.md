@@ -70,3 +70,7 @@ This admin tool provides functionality to manage films and actors in the databas
 - Date format: YYYY-MM-DD.
 
 --- 
+
+TODO: 
+Перенести bootstrap на внутренний сервер, не с внешнего, положить в статик 
+Добить полнотекстовый поиск и удаление
